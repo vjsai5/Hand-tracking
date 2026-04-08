@@ -10,7 +10,6 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from collections import deque
 
-
 class HandTracker:
     def __init__(self):
         self.model_path = "hand_landmarker.task"
@@ -30,7 +29,6 @@ class HandTracker:
 
         self.landmarker = HandLandmarker.create_from_options(options)
 
-        
         self.connections = [
             (0,1),(1,2),(2,3),(3,4),
             (0,5),(5,6),(6,7),(7,8),
@@ -39,8 +37,6 @@ class HandTracker:
             (0,17),(17,18),(18,19),(19,20),
             (5,9),(9,13),(13,17)
         ]
-
-       
         self.history = deque(maxlen=10)
 
     def _download_model(self):
@@ -48,8 +44,6 @@ class HandTracker:
             print("Downloading model...")
             urllib.request.urlretrieve(self.model_url, self.model_path)
             print("Model ready.")
-
-   
 
     def draw_hand(self, frame, landmarks):
         h, w, _ = frame.shape
@@ -60,9 +54,7 @@ class HandTracker:
 
         for p in pts:
             cv2.circle(frame, p, 4, (0, 255, 0), -1)
-
         return pts
-
     def draw_bbox(self, frame, landmarks, label):
         h, w, _ = frame.shape
         xs = [lm.x * w for lm in landmarks]
@@ -84,8 +76,6 @@ class HandTracker:
         overlay = frame.copy()
         cv2.rectangle(overlay, (0,0), (250,140), (0,0,0), -1)
         return cv2.addWeighted(overlay, 0.5, frame, 0.5, 0)
-
-    
 
     def count_fingers(self, lm):
         tips = [4, 8, 12, 16, 20]
@@ -112,9 +102,6 @@ class HandTracker:
     def smooth_gesture(self, gesture):
         self.history.append(gesture)
         return max(set(self.history), key=self.history.count)
-
-   
-
     def process(self, frame, timestamp):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
@@ -139,10 +126,6 @@ class HandTracker:
                 output.append((count, gesture))
 
         return frame, output, len(result.hand_landmarks or [])
-
-
-
-
 class HandTrackerGUI:
     def __init__(self, root):
         self.root = root
@@ -193,13 +176,11 @@ class HandTrackerGUI:
 
                 timestamp = int(time.time() * 1000)
                 frame, data, num_hands = self.tracker.process(frame, timestamp)
-
                 
                 curr_time = time.time()
                 fps = int(1 / (curr_time - self.prev_time)) if self.prev_time else 0
                 self.prev_time = curr_time
-
-                
+         
                 y = 30
                 for count, gesture in data:
                     cv2.putText(frame, f"{gesture} ({count})", (10, y),
@@ -211,11 +192,9 @@ class HandTrackerGUI:
 
                 cv2.putText(frame, f"FPS: {fps}", (10, y+30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,0), 2)
-
-                
+       
                 self.status.config(text=f"Hands: {num_hands} | FPS: {fps}")
 
-                
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 img = Image.fromarray(rgb)
                 imgtk = ImageTk.PhotoImage(image=img)
